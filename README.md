@@ -42,3 +42,29 @@ Para criar o banco `IAdb`, execute:
 
 ```bash
 mysql -u root -p < IAdb.sql
+
+
+# 🎧 Assistente de Coleta de Dados do YouTube
+
+Este projeto realiza a busca e extração de conteúdo textual de vídeos do YouTube, transcrevendo o áudio (ou legendas automáticas), aplicando filtros de ruído e armazenando o texto em banco de dados MySQL e arquivos `.txt`.
+
+## 🚀 Funcionalidades
+
+- 🔎 Busca automática de vídeos no YouTube por palavras-chave
+- 📥 Download do áudio ou legendas automáticas (em português)
+- 🧹 Limpeza de legendas `.vtt` (remoção de timestamps, tags e duplicação)
+- 🧠 Transcrição de áudio via Google Speech Recognition
+- 🎛️ Redução de ruído opcional via `noisereduce` ou filtro com `pydub`
+- 💾 Armazenamento em banco de dados (MySQL)
+- 🗂️ Geração de arquivos `.txt` com transcrição limpa
+
+## 🛠️ Requisitos
+
+- Python 3.7+
+- ffmpeg (instalado e disponível no PATH)
+- MySQL Server (com banco `IAdb` e tabelas definidas)
+- Dependências Python:
+
+```bash
+pip install -r requirements.txt
+
