@@ -1,70 +1,153 @@
-# 🤖 Assistente de Voz Inteligente + Geração de Dados para Treinamento
+# 🤖 Assistente de Voz Inteligente + Coleta de Dados do YouTube
 
-Este projeto tem como objetivo construir um **assistente de voz inteligente** com integração à OpenAI, que classifica e armazena informações estruturadas com propósito de gerar **dados ricos para treinamentos de IA**.
+Este projeto visa a construção de um **assistente de voz inteligente** com integração à OpenAI, além de um **coletor de dados do YouTube** para alimentar um banco estruturado com informações úteis para treinamento de modelos de IA.
 
 ---
 
 ## 🎯 Objetivos
 
-- Criar uma interface de voz para interação com o usuário
+- Interagir com usuários via voz e comandos naturais
 - Armazenar perguntas e respostas no banco de dados com contexto emocional e linguístico
 - Classificar sentimentos, idiomas e tipo de operação de cada entrada
-- Dividir automaticamente frases complexas em subperguntas (comandos menores)
-- Construir datasets organizados para modelos de NLP, classificadores e redes neurais
+- Dividir automaticamente frases complexas em subperguntas
+- Buscar vídeos no YouTube, transcrevendo fala ou capturando legendas
+- Construir datasets organizados para NLP, classificadores e redes neurais
 
 ---
 
 ## 🧠 Tecnologias Utilizadas
 
-- Python 3
+- Python 3.7+
 - OpenAI API (ChatGPT)
+- SpeechRecognition (entrada de voz)
 - GTTS ou eSpeak (síntese de voz)
 - MySQL (estrutura relacional robusta)
-- SpeechRecognition (entrada por voz)
+- yt-dlp (download de vídeo/áudio/legenda)
+- Pydub / Noisereduce (filtros e redução de ruído)
+- FFmpeg (conversão de mídia)
 
 ---
 
 ## 🏗️ Estrutura do Projeto
 
-| Componente              | Descrição                                                                 |
-|-------------------------|---------------------------------------------------------------------------|
-| `assistente.py`         | Script principal do assistente por voz                                   |
-| `IAdb.sql`              | Script de criação e estrutura do banco de dados                          |
-| `origem`, `sentimentos`, `idiomas`, `tipo_operacao` | Tabelas base para enriquecimento e classificação |
-| `subpergunta`, `subpergunta_operacao` | Quebra frases em instruções e associa tipo de ação |
-| `analise_sentimentos`   | Relaciona perguntas ao sentimento dominante detectado                    |
+| Arquivo/Tabela            | Descrição                                                                 |
+|---------------------------|---------------------------------------------------------------------------|
+| `assistente.py`           | Script principal do assistente de voz                                     |
+| `youtube.py`              | Script para coleta e transcrição de vídeos do YouTube                     |
+| `IAdb.sql`                | Script SQL com estrutura de tabelas                                       |
+| `origem`                  | Define origem da entrada (voz, treinamento, legenda, etc)                 |
+| `sentimentos`             | Lista de emoções básicas para análise e anotação                         |
+| `idiomas`                 | Lista de idiomas com seus respectivos códigos ISO                         |
+| `tipo_operacao`           | Define o tipo de ação da entrada (pergunta, execução, busca, etc)         |
+| `perguntas`               | Perguntas transcritas com data, origem e status                           |
+| `respostas`               | Respostas fornecidas pelo assistente                                      |
+| `analise_sentimentos`     | Associação entre pergunta e sentimento dominante                         |
+| `subpergunta`             | Frases divididas automaticamente                                          |
+| `subpergunta_operacao`   | Relaciona subpergunta ao tipo de operação                                 |
 
 ---
 
-## 🗃️ Banco de Dados
+## 📂 Coleta de Dados do YouTube
 
-Para criar o banco `IAdb`, execute:
+O script `youtube.py` busca vídeos e extrai dados conforme o modo configurado:
+
+### Modos de Captura
+
+```python
+modo_captura = 3  # 1 = áudio filtrado, 2 = com ruído, 3 = legenda
+modo_filtro = 2   # 1 = filtro pydub, 2 = noisereduce
+```
+
+### Funcionamento:
+
+- Se `modo_captura = 3` → Captura legenda automática (em português) e salva como:
+  - Um registro no banco (`perguntas`)
+  - Arquivo `.txt` com o texto limpo
+
+- Se `modo_captura = 1` ou `2`:
+  - Faz download do áudio
+  - Aplica filtro de ruído
+  - Divide em segmentos por silêncio
+  - Transcreve com Google Speech Recognition
+  - Salva as frases transcritas no banco e `.txt`
+
+---
+
+## 💾 Banco de Dados
+
+Crie o banco com:
 
 ```bash
-mysql -u root -p < IAdb.sql
+mysql -u seu_usuario -p < IAdb.sql
+```
 
+Configure o acesso no script `youtube.py`:
 
-# 🎧 Assistente de Coleta de Dados do YouTube
+```python
+conn = mysql.connector.connect(
+    host="localhost",
+    user="seu_usuario",
+    password="sua_senha",
+    database="IAdb"
+)
+```
 
-Este projeto realiza a busca e extração de conteúdo textual de vídeos do YouTube, transcrevendo o áudio (ou legendas automáticas), aplicando filtros de ruído e armazenando o texto em banco de dados MySQL e arquivos `.txt`.
-
-## 🚀 Funcionalidades
-
-- 🔎 Busca automática de vídeos no YouTube por palavras-chave
-- 📥 Download do áudio ou legendas automáticas (em português)
-- 🧹 Limpeza de legendas `.vtt` (remoção de timestamps, tags e duplicação)
-- 🧠 Transcrição de áudio via Google Speech Recognition
-- 🎛️ Redução de ruído opcional via `noisereduce` ou filtro com `pydub`
-- 💾 Armazenamento em banco de dados (MySQL)
-- 🗂️ Geração de arquivos `.txt` com transcrição limpa
+---
 
 ## 🛠️ Requisitos
 
 - Python 3.7+
-- ffmpeg (instalado e disponível no PATH)
-- MySQL Server (com banco `IAdb` e tabelas definidas)
-- Dependências Python:
+- FFmpeg instalado
+- MySQL Server rodando
+- yt-dlp disponível no terminal
+
+Instale as dependências Python:
 
 ```bash
 pip install -r requirements.txt
+```
 
+### Exemplo de `requirements.txt`
+
+```
+yt-dlp
+pydub
+noisereduce
+SpeechRecognition
+mysql-connector-python
+```
+
+---
+
+## ▶️ Como Usar
+
+```bash
+python youtube.py
+```
+
+Por padrão, buscará 3 vídeos com o termo `"saúde pública"` e processará conforme o modo selecionado.
+
+---
+
+## 📂 Saídas Esperadas
+
+- Registro(s) inserido(s) na tabela `perguntas`
+- Arquivo `.txt` com a transcrição limpa salvo no mesmo diretório do script:
+
+```bash
+/home/usuario/projeto/yuDpa-nU3t8.txt
+```
+
+---
+
+## 📌 Observações
+
+- Apenas legendas em **português** são consideradas
+- Caso não haja legenda, o vídeo é ignorado no modo 3
+- O áudio pode ser processado com ou sem remoção de ruído
+
+---
+
+## 📄 Licença
+
+Uso livre para fins pessoais, educacionais e acadêmicos.
