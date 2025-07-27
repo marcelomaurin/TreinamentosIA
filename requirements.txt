@@ -1,0 +1,8 @@
+yt-dlp
+pydub
+noisereduce
+SpeechRecognition
+mysql-connector-python
+ffmpeg-python
+numpy
+
