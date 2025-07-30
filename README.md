@@ -1,3 +1,4 @@
+
 # 🤖 Assistente de Voz Inteligente + Coleta de Dados do YouTube
 
 Este projeto visa a construção de um **assistente de voz inteligente** com integração à OpenAI, além de um **coletor de dados do YouTube** para alimentar um banco estruturado com informações úteis para treinamento de modelos de IA.
@@ -43,7 +44,7 @@ Este projeto visa a construção de um **assistente de voz inteligente** com int
 | `respostas`               | Respostas fornecidas pelo assistente                                      |
 | `analise_sentimentos`     | Associação entre pergunta e sentimento dominante                         |
 | `subpergunta`             | Frases divididas automaticamente                                          |
-| `subpergunta_operacao`   | Relaciona subpergunta ao tipo de operação                                 |
+| `subpergunta_operacao`    | Relaciona subpergunta ao tipo de operação                                 |
 
 ---
 
