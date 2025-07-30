@@ -118,3 +118,4 @@ python assistente.py
 ## 📄 Licença
 
 Uso livre para fins pessoais, educacionais e acadêmicos.
+ 
