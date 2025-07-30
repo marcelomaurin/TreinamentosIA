@@ -1,120 +1,127 @@
+# 🧠 Ferramentas de Treinamento para Redes Neurais
 
-# 🤖 Assistente de Voz Inteligente + Coleta de Dados do YouTube
-
-Este projeto visa a construção de um **assistente de voz inteligente** com integração à OpenAI, além de um **coletor de dados do YouTube** para alimentar um banco estruturado com informações úteis para treinamento de modelos de IA.
-
----
-
-## 🎯 Objetivos
-
-- Interagir com usuários via voz e comandos naturais
-- Armazenar perguntas e respostas no banco de dados com contexto emocional e linguístico
-- Classificar sentimentos, idiomas e tipo de operação de cada entrada
-- Dividir automaticamente frases complexas em subperguntas
-- Buscar vídeos no YouTube, transcrevendo fala ou capturando legendas
-- Construir datasets organizados para NLP, classificadores e redes neurais
+Este projeto fornece um **conjunto integrado de ferramentas** para **captura, processamento e organização de dados** destinados ao **treinamento de modelos de IA**. Os dados são obtidos de diferentes fontes como áudio, vídeo, imagens, textos, produtos e e-mails.
 
 ---
 
-## 🧠 Tecnologias Utilizadas
+## 🎯 Objetivo
 
-- Python 3.7+
-- OpenAI API (ChatGPT)
-- SpeechRecognition (entrada de voz)
-- GTTS ou eSpeak (síntese de voz)
-- MySQL (estrutura relacional robusta)
-- yt-dlp (download de vídeo/áudio/legenda)
-- Pydub / Noisereduce (filtros e redução de ruído)
-- FFmpeg (conversão de mídia)
+- Criar uma base sólida de dados para treinar modelos de IA (voz, texto, imagem).
+- Utilizar fontes reais para enriquecer o dataset (YouTube, Mercado Livre, e-mail, webcam, documentos).
+- Automatizar o fluxo completo: **captura → processamento → organização → armazenamento**.
+- Controlar todos os dados via interface web (Streamlit).
 
 ---
 
-## 🏗️ Estrutura do Projeto e Tabelas do Banco de Dados
+## 📦 Funcionalidades
 
-### Tabelas e Finalidades:
-
-- **`origem`**: Registra de onde a informação veio (voz, treinamento manual, YouTube, etc.)
-- **`sentimentos`**: Lista de sentimentos possíveis para análise emocional das perguntas.
-- **`idiomas`**: Mantém os idiomas suportados para classificação automática.
-- **`tipo_operacao`**: Define ações como "Pergunta", "Execução de comando", "Pesquisa".
-- **`perguntas`**: Armazena perguntas feitas (voz/texto/legenda) com data e origem.
-- **`respostas`**: Respostas geradas pelo assistente, vinculadas a uma pergunta.
-- **`analise_sentimentos`**: Liga perguntas aos sentimentos detectados.
-- **`subpergunta`**: Divide frases longas em subperguntas para melhor interpretação.
-- **`subpergunta_operacao`**: Define o tipo de operação esperado para cada subpergunta.
-- **`termobusca`**: Lista termos para busca automática de vídeos no YouTube.
-- **`item_compra`**: Registra itens a serem pesquisados (ex: Mercado Livre).
-- **`item_compra_resultado`**: Armazena os resultados coletados dos itens pesquisados.
-- **`foto`**: Guarda imagens capturadas (ex: câmeras conectadas).
-- **`face`**: Armazena recortes de rostos detectados em fotos.
-- **`face_informacao`**: Guarda detalhes da análise facial (emoção, idade, gênero, etc.).
-- **`contas_email`**: Configurações de contas de e-mail (POP3/SMTP).
-- **`emails`**: Armazena e-mails recebidos e processados.
-- **`subpergunta`**: Frases quebradas automaticamente para entendimento granular.
+| Módulo                    | Finalidade |
+|--------------------------|------------|
+| `assistente2.py`         | Assistente de voz com ativação por fala ("computador"). Registra a pergunta e responde com áudio. |
+| `captura.py`             | Captura imagens via câmera/Kinect, detecta e recorta faces. Armazena tudo no banco. |
+| `youtube.py`             | Busca vídeos no YouTube, transcreve legendas ou áudios e insere frases no banco (`perguntas`). |
+| `captura_email.py`       | Gerencia múltiplas contas POP3, baixa e salva e-mails no banco. |
+| `busca_mercadolivre.py`  | Busca produtos com base nos itens de compra cadastrados, extrai dados e insere no banco. |
+| `analisadocumentos.py`   | Varre diretórios, processa arquivos (PDF, TXT, DOCX, CSV) e extrai conteúdo textual. |
+| `web/app.py`             | Interface de controle das ferramentas e dos dados, usando Streamlit. |
 
 ---
 
-## 📂 Coleta de Dados do YouTube
+## 🗄️ Banco de Dados
 
-O script `youtube.py` busca vídeos e extrai dados conforme o modo configurado:
-
-### Modos de Captura:
-
-```python
-modo_captura = 3  # 1 = áudio filtrado, 2 = com ruído, 3 = legenda
-modo_filtro = 2   # 1 = filtro pydub, 2 = noisereduce
-```
-
-- **Modo 3 (Legendas)**: Captura apenas legendas automáticas em português.
-- **Modo 1/2 (Áudio)**: Captura áudio, aplica filtro de ruído e transcreve.
+| Tabela                     | Finalidade |
+|----------------------------|------------|
+| `perguntas`               | Armazena todas as frases (voz, vídeos, documentos). |
+| `respostas`               | Respostas associadas às perguntas (via IA ou script). |
+| `subpergunta`             | Quebra automática de perguntas longas. |
+| `item_compra`             | Lista de produtos buscados no Mercado Livre. |
+| `item_compra_resultado`   | Resultado da busca dos produtos. |
+| `termobusca`              | Termos para varredura de vídeos no YouTube. |
+| `documentos`              | Texto extraído de arquivos (PDF, TXT, etc.). |
+| `foto`                    | Imagens capturadas (frames de câmeras). |
+| `face`                    | Recortes de rostos detectados nas imagens. |
+| `face_informacao`         | Informações da face (emoção, idade, etc.). |
+| `contas_email`            | Contas de e-mail POP3 configuradas. |
+| `emails`                  | E-mails capturados e armazenados. |
 
 ---
 
-## 💾 Banco de Dados
+## 📂 Requisitos
 
-Criação inicial:
-```bash
-mysql -u seu_usuario -p < IAdb.sql
+- Python 3.10+
+- MySQL Server
+- FFmpeg
+- yt-dlp
+- Streamlit
+
+### `requirements.txt` (exemplo)
+
+```text
+mysql-connector-python
+gTTS
+SpeechRecognition
+opencv-python
+pydub
+noisereduce
+yt-dlp
+streamlit
+requests
+beautifulsoup4
+python-docx
+PyPDF2
 ```
 
 ---
 
-## 🛠️ Requisitos
+## ▶️ Como Executar
 
-- Python 3.7+
-- FFmpeg instalado
-- MySQL Server rodando
-- yt-dlp disponível no terminal
-
-Instalar dependências:
 ```bash
-pip install -r requirements.txt
-```
+# Assistente de voz
+python assistente2.py
 
----
+# Captura de imagem via webcam
+python captura.py
 
-## ▶️ Como Usar
-
-Executar coleta do YouTube:
-```bash
+# Coleta de vídeos e frases do YouTube
 python youtube.py
+
+# Captura e armazenamento de e-mails
+python captura_email.py
+
+# Busca de produtos no Mercado Livre
+python busca_mercadolivre.py
+
+# Processamento de documentos em pasta
+python analisadocumentos.py
+
+# Interface Web
+cd web
+streamlit run app.py
 ```
 
-Executar assistente de voz:
-```bash
-python assistente.py
-```
+---
+
+## 🌐 Interface Web (Streamlit)
+
+A interface permite:
+
+- Visualizar imagens e faces detectadas
+- Consultar perguntas e respostas
+- Gerenciar contas de e-mail e seus e-mails
+- Ver resultados do Mercado Livre
+- Analisar documentos cadastrados
+- Controlar termos para busca no YouTube
 
 ---
 
 ## 📌 Observações
 
-- Apenas legendas em **português** são consideradas.
-- O áudio pode ser processado com ou sem remoção de ruído.
-- Os dados alimentam um banco MySQL para futuras análises e treinamento.
+- O sistema usa o banco `IAdb` para todas as interações.
+- Você pode adicionar novos módulos, como processamento de áudio, OCR, classificação, etc.
+- Cada item pode ser expandido para criar datasets supervisionados, não supervisionados ou pré-processados para IA.
 
 ---
 
 ## 📄 Licença
 
-Uso livre para fins pessoais, educacionais e acadêmicos.
+Projeto livre para fins pessoais, educacionais e acadêmicos.
