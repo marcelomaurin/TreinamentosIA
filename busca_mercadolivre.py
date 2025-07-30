@@ -1,3 +1,8 @@
+# Programa busca_mercadolivre.py
+# Criado por Marcelo Maurin Martins
+# Data: 30/07/2025
+
+
 import mysql.connector
 import requests
 from bs4 import BeautifulSoup
@@ -14,38 +19,56 @@ conn = mysql.connector.connect(
 )
 cursor = conn.cursor(dictionary=True)
 
-# Função para extrair os dados do primeiro resultado
+# Criar sessão global para requisições HTTP
+session = requests.Session()
+session.headers.update({"User-Agent": "Mozilla/5.0"})
+
 def buscar_info_mercadolivre(termo):
-    url = f"https://lista.mercadolivre.com.br/{termo.replace(' ', '-')}"
-    headers = {"User-Agent": "Mozilla/5.0"}
-    
-    resp = requests.get(url, headers=headers)
-    soup = BeautifulSoup(resp.text, 'html.parser')
-    
-    primeiro_item = soup.select_one(".ui-search-result__wrapper")
-    if not primeiro_item:
+    try:
+        url = f"https://lista.mercadolivre.com.br/{termo.replace(' ', '-')}"
+        resp = session.get(url, timeout=10)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, 'html.parser')
+
+        # Novo seletor: cada item está em ".ui-search-layout__item"
+        primeiro_item = soup.select_one(".ui-search-layout__item")
+        if not primeiro_item:
+            print(f"⚠️ Nenhum item encontrado na página para '{termo}'")
+            return None
+
+        # Novo seletor para link
+        link_tag = primeiro_item.select_one("a")
+        if not link_tag or not link_tag.get("href"):
+            print(f"⚠️ Não foi possível encontrar o link do produto.")
+            return None
+        link = link_tag["href"]
+
+        # Preço atualizado (normalmente dentro de .andes-money-amount__fraction)
+        preco_tag = primeiro_item.select_one(".andes-money-amount__fraction")
+        preco = preco_tag.text.strip() if preco_tag else "Preço não encontrado"
+
+        # Acessa a página do produto
+        resp2 = session.get(link, timeout=10)
+        resp2.raise_for_status()
+        soup2 = BeautifulSoup(resp2.text, "html.parser")
+
+        descricao = soup2.select_one("h1").text.strip() if soup2.select_one("h1") else ""
+        desc_tecnica = ""
+
+        detalhes = soup2.select(".specs-wrapper, .ui-pdp-specs__table")
+        for bloco in detalhes:
+            desc_tecnica += bloco.get_text(separator=" | ", strip=True)
+
+        return {
+            "descricao": descricao,
+            "descricao_tecnica": desc_tecnica.strip(),
+            "preco": preco,
+            "link": link
+        }
+    except Exception as e:
+        print(f"❌ Erro ao buscar '{termo}': {e}")
         return None
 
-    link = primeiro_item.select_one("a.ui-search-link")["href"]
-    preco = primeiro_item.select_one(".ui-search-price__part").text.strip()
-
-    # Acessa o link para pegar a descrição técnica
-    resp2 = requests.get(link, headers=headers)
-    soup2 = BeautifulSoup(resp2.text, "html.parser")
-
-    descricao = soup2.select_one("h1").text.strip() if soup2.select_one("h1") else ""
-    desc_tecnica = ""
-
-    detalhes = soup2.select(".specs-wrapper, .ui-pdp-specs__table")
-    for bloco in detalhes:
-        desc_tecnica += bloco.get_text(separator=" | ", strip=True)
-
-    return {
-        "descricao": descricao,
-        "descricao_tecnica": desc_tecnica.strip(),
-        "preco": preco,
-        "link": link
-    }
 
 # Processar itens pendentes
 cursor.execute("SELECT * FROM item_compra WHERE processado = 0")
