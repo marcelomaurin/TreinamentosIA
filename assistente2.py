@@ -1,19 +1,33 @@
-TipoSaida = 1  # 1 = GTTS, 2 = eSpeak
+# Programa assistente2.py
+# Criado por Marcelo Maurin Martins
+# Data: 30/07/2025
 
 import pyttsx3
 import subprocess
 import tempfile
 from gtts import gTTS 
-import openai
-import speech_recognition as sr
 import os
 from collections import deque
 from datetime import datetime
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 import threading
+import speech_recognition as sr
+import mysql.connector
 
-# Inicialização condicional para pyttsx3 se TipoSaida 2 ou 3 for usado
+# Configurações
+TipoSaida = 1  # 1 = GTTS, 2 = eSpeak
+palavra_ativacao = "computador"
+
+# Configuração do banco de dados
+DB_CONFIG = {
+    "host": "localhost",
+    "user": "usuario",
+    "password": "senha",
+    "database": "IAdb",
+}
+
+# Inicialização condicional para pyttsx3
 espeak_engine = None
 if TipoSaida in [2, 3]:
     espeak_engine = pyttsx3.init()
@@ -24,26 +38,19 @@ if TipoSaida in [2, 3]:
     espeak_engine.setProperty('rate', 150)
     espeak_engine.setProperty('volume', 1.0)
 
-# 💖 Sua chave da OpenAI (nova versão)
-client = openai.OpenAI(api_key='chave')
+# Histórico
+historico_completo = deque(maxlen=50)
+buffer_resumido = deque(maxlen=10)
 
-# Palavra que ativa o assistente
-palavra_ativacao = "computador"
-
-# Histórico completo para resumo
-historico_completo = deque(maxlen=50)  # lista de (texto, datetime)
-
-# Buffer de contexto atual resumido
-buffer_resumido = deque(maxlen=10)  # apenas o resumo ativo
+def conectar_mysql():
+    return mysql.connector.connect(**DB_CONFIG)
 
 def iniciar_janela_historico():
     global historico_janela, texto_historico
     historico_janela = tk.Tk()
     historico_janela.title("Histórico do Buffer")
-
     texto_historico = ScrolledText(historico_janela, width=50, height=20, font=("Arial", 12))
     texto_historico.pack()
-
     atualizar_historico()
     historico_janela.mainloop()
 
@@ -72,79 +79,20 @@ def ouvir_microfone():
         print("⚠️ Erro ao acessar o serviço de reconhecimento:", e)
         return None
 
-def verificar_se_e_continuacao(nova_pergunta):
-    if not buffer_resumido:
-        return False
-    pergunta_anterior, _ = buffer_resumido[-1]
-    prompt = (
-        "Você é um classificador. Responda apenas com 'Sim' ou 'Não'.\n"
-        "Pergunta anterior:\n"
-        f"{pergunta_anterior}\n\n"
-        "Nova pergunta:\n"
-        f"{nova_pergunta}\n\n"
-        "A nova pergunta é continuação direta da anterior?"
-    )
-    try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Você é um classificador. Responda apenas com 'Sim' ou 'Não'."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        resultado = response.choices[0].message.content.strip().lower()
-        print(f"🤖 Classificador: {resultado}")
-        return resultado.startswith("sim")
-    except Exception as e:
-        print("⚠️ Erro na verificação de continuação:", e)
-        return False
+def chamar_processachatbot(id_pergunta):
+    print(f"🚀 Chamando processachatbot.py para a pergunta ID {id_pergunta}...")
+    subprocess.run(["python3", "processachatbot.py", str(id_pergunta)], check=True)
 
-def resumir_interacao(pergunta, resposta):
-    mensagens = [{"role": "system", "content": "Resuma a pergunta e a resposta em uma única frase mantendo o contexto essencial. Seja claro, direto e mantenha as informações importantes."}]
-    mensagens.append({"role": "user", "content": f"Pergunta: {pergunta}\nResposta: {resposta}"})
-
-    try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=mensagens
-        )
-        resumo = response.choices[0].message.content.strip()
-        print("🧠 Resumo da interação:", resumo)
-        buffer_resumido.clear()
-        buffer_resumido.append((resumo, datetime.now()))
-    except Exception as e:
-        print("⚠️ Erro ao gerar o resumo da interação:", e)
-
-
-def perguntar_chatgpt(pergunta):
-    mensagens = [{
-        "role": "system",
-        "content": (
-            "Você é um assistente virtual inteligente, inspirado na assistente Sexta-feira (F.R.I.D.A.Y.) do Homem de Ferro.\n"
-            "Suas respostas serão lidas por um sintetizador de voz (Google Speech), então escreva com clareza, ritmo e naturalidade.\n"
-            "Use frases curtas e objetivas. Separe ideias com vírgulas, pontos e reticências para marcar pausas naturais.\n"
-            "Evite interjeições como 'Ah!', 'Hmm', etc., pois elas não são bem interpretadas.\n"
-            "Evite frases longas. Prefira linguagem direta, sem floreios.\n"
-            "A entonação deve surgir da pontuação: vírgulas para pausas curtas, pontos para encerramento, reticências para continuidade."
-        )
-    }]
-
-    for entrada, _ in buffer_resumido:
-        mensagens.append({"role": "user", "content": entrada})
-
-    mensagens.append({"role": "user", "content": pergunta})
-
-    try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=mensagens
-        )
-        resposta = response.choices[0].message.content.strip()
-        print("🤖 ChatGPT:", resposta)
-        return resposta
-    except Exception as e:
-        print("⚠️ Erro na API:", e)
-        return "Desculpe, houve um erro ao consultar o sistema."
+def buscar_ultima_resposta(conn, id_pergunta):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT texto 
+        FROM respostas 
+        WHERE id_pergunta = %s 
+        ORDER BY data DESC LIMIT 1
+    """, (id_pergunta,))
+    resultado = cursor.fetchone()
+    return resultado['texto'] if resultado else None
 
 def falar_resposta(resposta):
     print("🗣️ Falando com carinho...")
@@ -156,11 +104,11 @@ def falar_resposta(resposta):
     elif TipoSaida in [2, 3]:
         espeak_engine.say(resposta)
         espeak_engine.runAndWait()
-    else:
-        print("⚠️ Tipo de saída de voz não suportado.")
 
 def assistente_loop():
     threading.Thread(target=iniciar_janela_historico, daemon=True).start()
+    conn = conectar_mysql()
+
     while True:
         texto = ouvir_microfone()
         if texto is None:
@@ -168,51 +116,34 @@ def assistente_loop():
 
         agora = datetime.now()
         nova_pergunta = texto.strip()
-        historico_completo.append((nova_pergunta, agora))
 
-        tempo_expirado = True
-        if buffer_resumido:
-            _, ultima_data = buffer_resumido[-1]
-            segundos = (agora - ultima_data).total_seconds()
-            tempo_expirado = segundos > 120
-
-        precisa_ativacao = not buffer_resumido or tempo_expirado
-
-        if precisa_ativacao:
-            if palavra_ativacao in nova_pergunta:
-                historico_completo.clear()
-                buffer_resumido.clear()
-                nova_pergunta = nova_pergunta.replace(palavra_ativacao, '').strip()
-                historico_completo.append((nova_pergunta, agora))
-            else:
-                print("⛔ Pergunta ignorada: é um novo assunto e a palavra de ativação não foi usada.")
-                continue
-        else:
+        if palavra_ativacao in nova_pergunta:
+            historico_completo.clear()
+            buffer_resumido.clear()
             nova_pergunta = nova_pergunta.replace(palavra_ativacao, '').strip()
-            if verificar_se_e_continuacao(nova_pergunta):
-                historico_completo.append((nova_pergunta, agora))
+            historico_completo.append((nova_pergunta, agora))
+
+            # Insere a pergunta na tabela e pega o ID
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO perguntas (texto, id_origem) VALUES (%s, %s)", (nova_pergunta, 1))
+            conn.commit()
+            id_pergunta = cursor.lastrowid
+
+            print(f"📌 Pergunta inserida com ID {id_pergunta}")
+
+            # Chama o processachatbot.py com o ID da pergunta
+            chamar_processachatbot(id_pergunta)
+
+            # Busca a resposta para essa pergunta
+            resposta = buscar_ultima_resposta(conn, id_pergunta)
+            if resposta:
+                falar_resposta(resposta)
+                historico_completo.append((resposta, datetime.now()))
+                atualizar_historico()
             else:
-                if palavra_ativacao in texto:
-                    historico_completo.clear()
-                    buffer_resumido.clear()
-                    nova_pergunta = nova_pergunta.replace(palavra_ativacao, '').strip()
-                    historico_completo.append((nova_pergunta, agora))
-                else:
-                    print("⛔ Pergunta ignorada: não é continuação e a palavra de ativação não foi usada.")
-                    continue
-
-        resposta = perguntar_chatgpt(nova_pergunta)
-        falar_resposta(resposta)
-
-        historico_completo.append((resposta, datetime.now()))
-        resumir_interacao(nova_pergunta, resposta)
-
-        print("\n📜 Histórico atualizado:")
-        for i, (p, d) in enumerate(historico_completo, 1):
-            print(f"{i:02d}. {p} ({d.strftime('%H:%M:%S')})")
-        print("")
-
-        atualizar_historico()
+                print("⚠️ Nenhuma resposta encontrada após o processamento.")
+        else:
+            print("⛔ Palavra de ativação não detectada. Ignorando...")
 
 if __name__ == "__main__":
     assistente_loop()

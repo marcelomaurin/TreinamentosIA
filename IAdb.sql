@@ -180,3 +180,123 @@ CREATE TABLE face_informacao (
   FOREIGN KEY (id_foto) REFERENCES foto(id) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (id_face) REFERENCES face(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- Tabela: item_compra
+CREATE TABLE item_compra (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item VARCHAR(255) NOT NULL,                -- Nome ou descrição do item para busca
+    processado TINYINT(1) DEFAULT 0,           -- 0 = Não processado, 1 = Processado
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Data de cadastro
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Tabela: item_compra_resultado
+CREATE TABLE item_compra_resultado (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_item_compra INT NOT NULL,               -- FK para item_compra
+    descricao VARCHAR(500) NOT NULL,           -- Descrição do item
+    descricao_tecnica TEXT,                    -- Informações técnicas
+    preco VARCHAR(50),                         -- Preço (como texto para evitar problemas com formato)
+    link VARCHAR(500),                         -- Link do produto no Mercado Livre
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de registro
+    FOREIGN KEY (id_item_compra) REFERENCES item_compra(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE item_compra_resultado MODIFY link TEXT;
+
+INSERT INTO item_compra (item) VALUES ('fone bluetooth'), ('placa mãe intel');
+INSERT INTO item_compra (item) VALUES ('impressora termica'), ('tonner HP');
+
+
+
+-- Tabela: area
+CREATE TABLE area (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,                    -- Nome da área
+    papel_ia TEXT NOT NULL,                        -- Papel que a IA deve assumir para esta área
+    criterio_identificacao TEXT NOT NULL,          -- Critério usado pela IA para identificar esta área
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Tabela: grupo
+CREATE TABLE grupo (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_area INT NOT NULL,                          -- FK para área
+    nome VARCHAR(200) NOT NULL,                    -- Nome do grupo
+    papel_ia TEXT NOT NULL,                        -- Papel que a IA deve assumir para este grupo
+    criterio_identificacao TEXT NOT NULL,          -- Critério usado pela IA para identificar este grupo
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_area) REFERENCES area(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Tabela: requisitos
+CREATE TABLE requisitos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_grupo INT NOT NULL,                         -- FK para grupo
+    descricao TEXT NOT NULL,                       -- Descrição do requisito
+    criterio_identificacao TEXT NOT NULL,          -- Critério da IA para validar o requisito
+    informacao_necessaria TEXT,                    -- Informação esperada para considerar o requisito atendido
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_grupo) REFERENCES grupo(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Tabela: acoes
+CREATE TABLE acoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_requisito INT NOT NULL,                     -- FK para requisito
+    nome VARCHAR(200) NOT NULL,                    -- Nome da ação
+    criterio_disparo TEXT NOT NULL,                -- Critério que dispara a ação
+    detalhes_acao TEXT,                            -- Detalhes ou instruções da ação
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_requisito) REFERENCES requisitos(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ 
+-- Tabela: contas_email
+CREATE TABLE contas_email (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,                  -- Nome identificador da conta (ex: Gmail Pessoal)
+    email VARCHAR(255) NOT NULL,                -- Endereço de e-mail
+    servidor_pop3 VARCHAR(255) NOT NULL,        -- Servidor POP3
+    porta_pop3 INT NOT NULL DEFAULT 995,        -- Porta POP3
+    ssl_pop3 TINYINT(1) DEFAULT 1,              -- SSL para POP3 (1=sim, 0=não)
+    servidor_smtp VARCHAR(255) NOT NULL,        -- Servidor SMTP
+    porta_smtp INT NOT NULL DEFAULT 465,        -- Porta SMTP
+    ssl_smtp TINYINT(1) DEFAULT 1,              -- SSL para SMTP (1=sim, 0=não)
+    usuario VARCHAR(255) NOT NULL,              -- Usuário de login
+    senha VARCHAR(255) NOT NULL,                -- Senha criptografada ou armazenada
+    ativo TINYINT(1) DEFAULT 1,                 -- Status da conta (ativa/inativa)
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- Data de cadastro
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Tabela: emails
+CREATE TABLE emails (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_conta INT NOT NULL,                          -- FK para a conta de e-mail
+    remetente VARCHAR(255) NOT NULL,                -- Endereço de quem enviou
+    destinatarios TEXT NOT NULL,                    -- Lista de destinatários (separados por ;)
+    cc TEXT,                                        -- Lista de cópias (separados por ;)
+    cco TEXT,                                       -- Lista de cópias ocultas (separados por ;)
+    assunto VARCHAR(500) NOT NULL,                  -- Assunto do e-mail
+    corpo LONGTEXT,                                 -- Corpo da mensagem (HTML ou texto)
+    data_envio DATETIME,                            -- Data/Hora de envio ou recebimento
+    lido TINYINT(1) DEFAULT 0,                      -- 0 = Não lido, 1 = Lido
+    tipo ENUM('RECEBIDO', 'ENVIADO') NOT NULL,      -- Tipo do e-mail (Recebido ou Enviado)
+    mensagem_id VARCHAR(255),                       -- ID da mensagem (RFC822 / servidores de e-mail)
+    referencia_id VARCHAR(255),                     -- ID de referência (para threads/conversas)
+    prioridade ENUM('ALTA', 'NORMAL', 'BAIXA') DEFAULT 'NORMAL', -- Prioridade do e-mail
+    anexos TINYINT(1) DEFAULT 0,                    -- 1 = Possui anexos, 0 = Não possui
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP,      -- Data de cadastro no sistema
+    FOREIGN KEY (id_conta) REFERENCES contas_email(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE emails 
+ADD COLUMN message_id VARCHAR(255) NOT NULL UNIQUE AFTER tipo;
+
+ALTER TABLE emails MODIFY tipo VARCHAR(50);
