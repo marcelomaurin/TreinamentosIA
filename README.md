@@ -11,6 +11,9 @@ Este projeto fornece um **conjunto integrado de ferramentas** para **captura, pr
 - Automatizar o fluxo completo: **captura → processamento → organização → armazenamento**.
 - Controlar todos os dados via interface web (Streamlit).
 
+![Diagrama do Projeto](https://github.com/marcelomaurin/TreinamentosIA/blob/main/Diagrama_Ferramentas_Treinamento_Comercial.png?raw=true)
+
+
 ---
 
 ## 📦 Funcionalidades
