@@ -5,4 +5,7 @@ SpeechRecognition
 mysql-connector-python
 ffmpeg-python
 numpy
+pyttsx3
+pyaudio
+opencv-python
 

@@ -57,7 +57,7 @@ INSERT INTO tipo_operacao (id, texto) VALUES
 CREATE TABLE perguntas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   data DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  texto TEXT NOT NULL,
+  texto LONGTEXT  NOT NULL,
   processado TINYINT DEFAULT 0,
   id_origem INT NOT NULL DEFAULT 1,
   FOREIGN KEY (id_origem) REFERENCES origem(id) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -102,3 +102,81 @@ CREATE TABLE subpergunta_operacao (
   FOREIGN KEY (id_tipo_operacao) REFERENCES tipo_operacao(id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- Tabela: foto (para armazenar imagens capturadas)
+CREATE TABLE foto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    frame LONGBLOB NOT NULL,
+    data DATE NOT NULL,
+    hora TIME NOT NULL,
+    device VARCHAR(100) NOT NULL,
+    processado TINYINT(1) DEFAULT 0,
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- Tabela: termobusca
+CREATE TABLE termobusca (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    termo VARCHAR(255) NOT NULL,                      -- Termo de busca (exibição principal)
+    texto VARCHAR(255) NOT NULL,                      -- Texto (compatibilidade com o código Python)
+    qtd_videos INT DEFAULT 0,                         -- Quantidade de vídeos relacionados
+    processado TINYINT(1) DEFAULT 0,                  -- 0 = Não processado, 1 = Processado
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de registro
+    ativo TINYINT(1) DEFAULT 1,                       -- 1 = Ativo, 0 = Inativo
+    id_origem INT NOT NULL,                           -- FK para origem
+    CONSTRAINT fk_termobusca_origem 
+        FOREIGN KEY (id_origem) REFERENCES origem(id)
+        ON DELETE RESTRICT 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE termobusca MODIFY qtd_videos INT NOT NULL DEFAULT 3;
+
+INSERT INTO termobusca (termo, texto, qtd_videos, processado, id_origem)
+VALUES
+('Vacinação Infantil', 'Vacinação Infantil', 3, 0, 2),
+('Prevenção de Diabetes', 'Prevenção de Diabetes', 5, 0, 2),
+('Cuidados com a Saúde Mental', 'Cuidados com a Saúde Mental', 2, 0, 2);
+
+-- Tabela: processa_img
+CREATE TABLE processa_img (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,             -- Nome do processamento
+    script VARCHAR(255) NOT NULL,           -- Caminho para o script Python
+    status TINYINT(1) NOT NULL DEFAULT 1,   -- 1 = Ativo, 0 = Inativo
+    descricao TEXT,                         -- Descrição opcional do script
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO processa_img (nome, script, status, descricao)
+VALUES 
+(
+    'Captura de Face',
+    '/home/mmm/projetos/maurinsoft/assistente2/captura_face.py',
+    1,
+    'Script responsável por detectar faces em imagens, recortar e salvar as informações da face (posição e ID gerado).'
+);
+
+-- Tabela: face
+CREATE TABLE face (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_foto INT NOT NULL,
+  face LONGBLOB NOT NULL,
+  processado TINYINT(1) DEFAULT 0,
+  dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_foto) REFERENCES foto(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Tabela: face_informacao
+CREATE TABLE face_informacao (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_foto INT NOT NULL,
+  id_face INT NOT NULL,
+  id_propriedade INT NOT NULL,
+  campo VARCHAR(100) NOT NULL,
+  propriedade VARCHAR(100) NOT NULL,
+  valor VARCHAR(255) NOT NULL,
+  dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_foto) REFERENCES foto(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_face) REFERENCES face(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

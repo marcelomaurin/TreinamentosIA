@@ -19,7 +19,8 @@ conn = mysql.connector.connect(
     host="localhost",
     user="usuario",
     password="senha",
-    database="IAdb"
+    database="IAdb",
+    ssl_disabled=True
 )
 cursor = conn.cursor()
 
@@ -235,6 +236,7 @@ def processa_video(url):
 
             print(f"📄 Transcrição limpa salva em: {caminho_txt}")
             os.remove(caminho_vtt)  # opcional
+            os.remove(caminho_txt)  # opcional
         else:
             print("⚠️ Nenhuma legenda .vtt encontrada.")
         return
@@ -289,25 +291,42 @@ def processa_video(url):
         print(f"✅ {len(frases)} frases salvas após segmentação.")
 
 
-def buscar_e_processar(termobusca="saúde pública", qtd_videos=3):
-    search_term = f"ytsearch{qtd_videos}:{termobusca}"
-    print(f"🔍 Buscando vídeos com o termo: {termobusca}")
 
-    ydl_opts = {
-        'quiet': True,
-        'skip_download': True,
-    }
+def buscar_e_processar():
+    cursor.execute("SELECT id, texto, qtd_videos FROM termobusca WHERE processado = 0")
+    termos = cursor.fetchall()
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(search_term, download=False)
-        entries = info_dict.get("entries", [])
-        for entry in entries:
-            url = f"https://www.youtube.com/watch?v={entry['id']}"
-            print(f"🎥 Encontrado: {entry['title']}")
-            processa_video(url)
+    if not termos:
+        print("📭 Nenhum termo de busca pendente.")
+        return
+
+    for termo_id, texto, qtd in termos:
+        search_term = f"ytsearch{qtd}:{texto}"
+        print(f"🔍 Buscando vídeos para: '{texto}' (qtd_videos={qtd})")
+
+        ydl_opts = {
+            'quiet': True,
+            'skip_download': True,
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(search_term, download=False)
+            entries = info_dict.get("entries", [])
+            for entry in entries:
+                url = f"https://www.youtube.com/watch?v={entry['id']}"
+                print(f"🎥 Encontrado: {entry['title']}")
+                processa_video(url)
+
+        # Marcar termo como processado
+        cursor.execute("UPDATE termobusca SET processado = 1 WHERE id = %s", (termo_id,))
+        conn.commit()
+        print(f"✅ Termo '{texto}' marcado como processado.")
+
+
 
 def main():
-    buscar_e_processar(termobusca="saúde pública", qtd_videos=3)
+    buscar_e_processar()
+
 
 if __name__ == "__main__":
     main()
