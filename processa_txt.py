@@ -5,14 +5,7 @@
 import sys
 import mysql.connector
 import os
-
-# ?? Configuração do banco de dados
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "usuario",
-    "password": "senha",
-    "database": "IAdb",
-}
+from db_config import DB_CONFIG
 
 def conectar_mysql():
     return mysql.connector.connect(**DB_CONFIG)

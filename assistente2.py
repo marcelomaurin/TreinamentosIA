@@ -5,7 +5,7 @@
 import pyttsx3
 import subprocess
 import tempfile
-from gtts import gTTS 
+from gtts import gTTS
 import os
 from collections import deque
 from datetime import datetime
@@ -14,18 +14,11 @@ from tkinter.scrolledtext import ScrolledText
 import threading
 import speech_recognition as sr
 import mysql.connector
+from db_config import DB_CONFIG
 
 # Configurações
 TipoSaida = 1  # 1 = GTTS, 2 = eSpeak
 palavra_ativacao = "computador"
-
-# Configuração do banco de dados
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "usuario",
-    "password": "senha",
-    "database": "IAdb",
-}
 
 # Inicialização condicional para pyttsx3
 espeak_engine = None
