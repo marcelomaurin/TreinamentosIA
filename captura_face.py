@@ -7,14 +7,10 @@ import os
 import cv2
 import mysql.connector
 from datetime import datetime
+from db_config import DB_CONFIG
 
 def conectar_banco():
-    return mysql.connector.connect(
-        host="localhost",
-        user="usuario",
-        password="senha",
-        database="IAdb"
-    )
+    return mysql.connector.connect(**DB_CONFIG)
 
 def redimensionar_face(face_img):
     return cv2.resize(face_img, (320, 320), interpolation=cv2.INTER_AREA)

@@ -9,6 +9,7 @@ import subprocess
 import glob
 import os
 from datetime import datetime
+from db_config import DB_CONFIG
 
 # 🎯 Resolução
 RES_WIDTH = 640
@@ -24,12 +25,7 @@ if flg_kinect:
 
 # 💾 Conexão com MySQL
 def conectar_mysql():
-    return mysql.connector.connect(
-        host="localhost",
-        user="usuario",
-        password="senha",
-        database="IAdb"
-    )
+    return mysql.connector.connect(**DB_CONFIG)
 
 def processa_scripts(id_foto, caminho_arquivo):
     print(f"🔧 Executando scripts de processamento para ID {id_foto} com arquivo {caminho_arquivo}...")

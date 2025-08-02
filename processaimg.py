@@ -7,15 +7,7 @@ import mysql.connector
 import os
 import subprocess
 from datetime import datetime
-
-# 🔧 Configuração de conexão com MySQL
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "usuario",
-    "password": "senha",
-    "database": "IAdb",
-    "ssl_disabled": True
-}
+from db_config import DB_CONFIG
 
 def processaimagem(conn, caminho_arquivo, id_imagem):
     """
@@ -68,7 +60,7 @@ def main():
     # 🔗 Conexão com o banco e processamento
     try:
         print(f"[{datetime.now()}] 🔗 Conectando ao banco de dados...")
-        conn = mysql.connector.connect(**DB_CONFIG)
+        conn = mysql.connector.connect(**DB_CONFIG, ssl_disabled=True)
         print("✅ Conexão com o banco de dados estabelecida.")
 
         processaimagem(conn, caminho, id_foto)

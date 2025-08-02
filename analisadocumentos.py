@@ -6,17 +6,10 @@ import os
 import mysql.connector
 from datetime import datetime
 import subprocess
+from db_config import DB_CONFIG
 
 # ?? Diretório base dos documentos
 DOCS_DIR = "/home/mmm/projetos/maurinsoft/assistente2/docs"
-
-# ?? Configuração do banco de dados
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "usuarios",
-    "password": "senha",
-    "database": "IAdb",
-}
 
 # Extensões válidas e scripts correspondentes
 EXT_SCRIPTS = {

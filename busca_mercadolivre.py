@@ -8,15 +8,10 @@ import requests
 from bs4 import BeautifulSoup
 import time
 from datetime import datetime
+from db_config import DB_CONFIG
 
 # Conexão com o banco
-conn = mysql.connector.connect(
-    host="127.0.0.1",
-    user="usuario",
-    password="senha",
-    database="IAdb",
-    ssl_disabled=True
-)
+conn = mysql.connector.connect(**DB_CONFIG, ssl_disabled=True)
 cursor = conn.cursor(dictionary=True)
 
 # Criar sessão global para requisições HTTP

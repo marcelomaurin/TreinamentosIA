@@ -9,15 +9,11 @@ from email.parser import BytesParser
 from email.policy import default
 from datetime import datetime
 from email.utils import parsedate_to_datetime
+from db_config import DB_CONFIG
 
 # ?? Conexão com MySQL
 def conectar_mysql():
-    return mysql.connector.connect(
-        host="localhost",
-        user="usuario",
-        password="senha",
-        database="IAdb"
-    )
+    return mysql.connector.connect(**DB_CONFIG)
     
 
 def converter_data_email(data_raw):

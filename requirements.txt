@@ -8,4 +8,5 @@ numpy
 pyttsx3
 pyaudio
 opencv-python
+python-dotenv
 

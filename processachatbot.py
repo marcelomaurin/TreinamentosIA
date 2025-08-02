@@ -2,21 +2,15 @@
 # Criado por Marcelo Maurin Martins
 # Data: 30/07/2025
 
+import os
 import mysql.connector
 import openai
 import sys
 from datetime import datetime
+from db_config import DB_CONFIG
 
 # 🔑 Configuração da API OpenAI
-client = openai.OpenAI(api_key="SUA_CHAVE_OPENAI")
-
-# 🔧 Configuração do banco de dados
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "usuario",
-    "password": "senha",
-    "database": "IAdb",
-}
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # 🎯 Função para conectar ao MySQL
 def conectar_mysql():
