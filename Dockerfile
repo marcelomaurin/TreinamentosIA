@@ -13,5 +13,6 @@ COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY . .
+ENV APP_SCRIPT=assistente2.py
 
-CMD ["python3"]
+CMD ["sh", "-c", "python3 ${APP_SCRIPT}"]
