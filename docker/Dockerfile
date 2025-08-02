@@ -12,7 +12,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copia apenas o código-fonte para dentro da imagem
+COPY src/ .
 ENV APP_SCRIPT=assistente2.py
 
 CMD ["sh", "-c", "python3 ${APP_SCRIPT}"]

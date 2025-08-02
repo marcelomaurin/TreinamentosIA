@@ -20,18 +20,18 @@ Este projeto fornece um **conjunto integrado de ferramentas** para **captura, pr
 
 | Módulo                    | Finalidade |
 |--------------------------|------------|
-| `assistente2.py`         | Assistente de voz com ativação por fala ("computador"). Registra a pergunta e responde com áudio. |
-| `captura.py`             | Captura imagens via câmera/Kinect e envia para o pipeline de pós-processamento. |
-| `processaimg.py`         | Executa os scripts cadastrados para tratar imagens recém-capturadas. |
-| `captura_face.py`        | Detecta rostos nas imagens, gera recortes e salva metadados no banco. |
-| `youtube.py`             | Busca vídeos no YouTube, transcreve legendas/áudios e insere frases no banco (`perguntas`). |
-| `captura_email.py`       | Gerencia múltiplas contas POP3, baixa e salva e-mails no banco. |
-| `busca_mercadolivre.py`  | Busca produtos com base nos itens de compra cadastrados, extrai dados e insere no banco. |
-| `analisadocumentos.py`   | Varre diretórios e dispara scripts de parsing para diferentes formatos de arquivo. |
-| `processa_pdf.py`        | Extrai texto de arquivos PDF e salva em `documentos`. |
-| `processa_txt.py`        | Converte arquivos TXT para o banco de dados `documentos`. |
-| `processachatbot.py`     | Gera respostas via OpenAI para perguntas pendentes e grava em `respostas`. |
-| `web/app.py`             | Interface de controle das ferramentas e dos dados usando Streamlit. |
+| `docker/src/assistente2.py`         | Assistente de voz com ativação por fala ("computador"). Registra a pergunta e responde com áudio. |
+| `docker/src/captura.py`             | Captura imagens via câmera/Kinect e envia para o pipeline de pós-processamento. |
+| `docker/src/processaimg.py`         | Executa os scripts cadastrados para tratar imagens recém-capturadas. |
+| `docker/src/captura_face.py`        | Detecta rostos nas imagens, gera recortes e salva metadados no banco. |
+| `docker/src/youtube.py`             | Busca vídeos no YouTube, transcreve legendas/áudios e insere frases no banco (`perguntas`). |
+| `docker/src/captura_email.py`       | Gerencia múltiplas contas POP3, baixa e salva e-mails no banco. |
+| `docker/src/busca_mercadolivre.py`  | Busca produtos com base nos itens de compra cadastrados, extrai dados e insere no banco. |
+| `docker/src/analisadocumentos.py`   | Varre diretórios e dispara scripts de parsing para diferentes formatos de arquivo. |
+| `docker/src/processa_pdf.py`        | Extrai texto de arquivos PDF e salva em `documentos`. |
+| `docker/src/processa_txt.py`        | Converte arquivos TXT para o banco de dados `documentos`. |
+| `docker/src/processachatbot.py`     | Gera respostas via OpenAI para perguntas pendentes e grava em `respostas`. |
+| `docker/src/web/app.py`             | Interface de controle das ferramentas e dos dados usando Streamlit. |
 
 ---
 
@@ -84,6 +84,9 @@ PyPDF2
 ## ▶️ Como Executar
 
 ```bash
+# Navegue até os scripts
+cd docker/src
+
 # Assistente de voz
 python assistente2.py
 
@@ -115,7 +118,7 @@ streamlit run app.py
 2. **Colete dados** – use os módulos de captura (`assistente2.py`, `captura.py`, `youtube.py`, `captura_email.py`, `busca_mercadolivre.py`, `analisadocumentos.py`) para popular o banco com voz, imagens, textos e metadados.
 3. **Pós-processamento** – cadastre scripts na tabela `processa_img` para que `processaimg.py` execute rotinas como `captura_face.py` após cada captura. Adicione novos scripts para extrair características ou rótulos para seus modelos.
 4. **Geração de respostas** – configure sua chave da OpenAI e utilize `processachatbot.py` para completar automaticamente as entradas da tabela `perguntas` com respostas geradas.
-5. **Exploração e exportação** – utilize a interface `web/app.py` para revisar as instâncias, validar amostras e exportar os dados para seu pipeline de treinamento.
+5. **Exploração e exportação** – utilize a interface `docker/src/web/app.py` para revisar as instâncias, validar amostras e exportar os dados para seu pipeline de treinamento.
 
 Este fluxo fornece uma base completa para criação de datasets multimodais, permitindo personalização em cada etapa conforme a necessidade do modelo que você deseja treinar.
 

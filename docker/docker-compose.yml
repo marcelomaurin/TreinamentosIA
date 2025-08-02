@@ -3,7 +3,7 @@ services:
   app:
     build: .
     volumes:
-      - .:/app
+      - ./src:/app
     depends_on:
       - db
     env_file:
