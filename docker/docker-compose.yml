@@ -8,6 +8,9 @@ services:
       - db
     env_file:
       - ./.env
+    ports:
+      - "22:22"
+      - "8501:8501"
   db:
     image: mysql:8.0
     restart: always
@@ -18,3 +21,18 @@ services:
       - ./mysql/IAdb.sql:/docker-entrypoint-initdb.d/IAdb.sql
     ports:
       - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:80"
+    depends_on:
+      - db

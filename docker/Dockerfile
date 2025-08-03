@@ -7,8 +7,14 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     portaudio19-dev \
     ffmpeg \
+    openssh-server \
     mysql-client \
     && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir /var/run/sshd \
+    && echo 'root:root' | chpasswd \
+    && sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config \
+    && sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
 WORKDIR /app
 
@@ -18,4 +24,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY app/ .
 ENV APP_SCRIPT=assistente2.py
 
-CMD ["sh", "-c", "python3 ${APP_SCRIPT}"]
+CMD ["sh", "-c", "/usr/sbin/sshd && python3 ${APP_SCRIPT}"]
