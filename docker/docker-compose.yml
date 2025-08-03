@@ -16,7 +16,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - "22:22"
+      - "2222:22"
       - "8501:8501"
     networks:
       - ia_network

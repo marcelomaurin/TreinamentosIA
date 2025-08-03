@@ -1,6 +1,5 @@
 .RECIPEPREFIX := >
-.PHONY: build up down logs run
-.PHONY: ssh
+.PHONY: build up down logs run ssh conecta_app
 
 COMPOSE = docker compose --env-file ./.env
 
@@ -20,3 +19,5 @@ run:
 >$(COMPOSE) run --rm app python3 $(script)
 ssh:
 >@ssh root@localhost -p 22
+conecta_app:
+>@$(COMPOSE) exec app bash
