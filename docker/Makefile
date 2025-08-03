@@ -1,7 +1,7 @@
 .RECIPEPREFIX := >
 .PHONY: build up down logs run
 
-COMPOSE = docker-compose --env-file ../.env
+COMPOSE = docker compose --env-file ./.env
 
 build:
 >$(COMPOSE) build
