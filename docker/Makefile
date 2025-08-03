@@ -1,16 +1,19 @@
+.RECIPEPREFIX := >
 .PHONY: build up down logs run
 
+COMPOSE = docker-compose --env-file ../.env
+
 build:
-	docker-compose build
+>$(COMPOSE) build
 
 up:
-	docker-compose up -d
+>$(COMPOSE) up -d
 
 down:
-	docker-compose down
+>$(COMPOSE) down
 
 logs:
-	docker-compose logs -f
+>$(COMPOSE) logs -f
 
 run:
-	docker-compose run --rm app python $(script)
+>$(COMPOSE) run --rm app python $(script)
