@@ -30,7 +30,8 @@ O diagrama a seguir ilustra a arquitetura de componentes:
 - **Busca em e‑commerce** (`busca_mercadolivre.py`): pesquisa produtos no Mercado Livre e registra resultados.
 - **Processamento de documentos** (`analisadocumentos.py`, `processa_pdf.py`, `processa_txt.py`): extrai texto de PDFs/TXT para a tabela de documentos.
 - **Geração de respostas IA** (`processachatbot.py`): utiliza a API OpenAI para responder perguntas pendentes.
-- **Interface Web** (`web/app.py`): painel Streamlit para monitorar e controlar todas as etapas.
+- **Transcrição de Áudio** (`processa_transcricao_audio.py`): fragmenta áudio em blocos de até 1 minuto (respeitando silêncios), filtra apenas voz, envia ao Google Speech-to-Text e armazena no banco.
+- **Interface Web** (`docker/app/web/main.py`): painel Streamlit para monitorar e controlar todas as etapas.
 
 ---
 
@@ -78,6 +79,7 @@ CREATE TABLE perguntas (
 
 - Docker Engine & Docker Compose (v2+)
 - Git
+- Google Cloud Speech-to-Text (conta e chave JSON)
 - (Opcional) Python 3.10+ para execução local sem Docker
 
 ### Configuração do ambiente
@@ -113,6 +115,12 @@ make down
 
 Após o container subir, a interface Streamlit estará disponível em `http://localhost:8501`.
 
+### Credenciais Google Cloud
+Para usar o Speech-to-Text, defina a variável de ambiente com sua chave JSON:
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="/caminho/para/sua-chave.json"
+```
+
 ### Execução local (sem Docker)
 
 1. Instale dependências:
@@ -131,12 +139,15 @@ Após o container subir, a interface Streamlit estará disponível em `http://lo
 ## 📂 Estrutura de Diretórios
 
 ```
-. 
-├── docker/                # Dockerfile, compose e scripts de orquestração
-├── mysql/                 # Script SQL de criação do banco
-├── web/                   # Código da interface Streamlit
-├── app/                   # Módulos de captura e processamento
-├── .env.example           # Exemplo de variáveis de ambiente
+.
+├── docker/                # Contêiner Docker e orquestração
+│   ├── app/               # Módulos de captura, processamento e transcrição
+│   ├── web/               # Interface Streamlit
+│   ├── mysql/             # Script SQL de criação do banco
+│   ├── requirements.txt   # Dependências Python
+│   ├── Dockerfile         # Imagem do ambiente
+│   └── Makefile           # Comandos de orquestração
+├── .env.example           # Exemplo de variáveis de ambiente para o Docker
 └── README.md              # Documentação do projeto
 ```
 
@@ -145,3 +156,4 @@ Após o container subir, a interface Streamlit estará disponível em `http://lo
 ## 📝 Licença
 
 Uso livre para fins educacionais e pesquisa. Sinta-se à vontade para adaptar e contribuir!
+| `transcricao`           | Texto transcrito de áudios, referenciando o documento de origem       |

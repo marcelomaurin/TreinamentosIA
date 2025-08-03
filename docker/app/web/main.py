@@ -19,6 +19,7 @@ if st.sidebar.button("?? Requisitos"): set_menu("Requisitos")
 if st.sidebar.button("? Ações"): set_menu("Ações")
 st.sidebar.markdown("---")
 if st.sidebar.button("?? Chatbot Inteligente"): set_menu("Chatbot")
+if st.sidebar.button("🎙️ Transcrição Áudio"): set_menu("Transcrição Áudio")
 if st.sidebar.button("?? Item de Compra"): set_menu("Item de Compra")
 if st.sidebar.button("? Perguntas"): set_menu("Perguntas")
 
@@ -45,3 +46,6 @@ elif menu == "Item de Compra":
 elif menu == "Perguntas":
     import perguntas
     perguntas.exibir()
+elif menu == "Transcrição Áudio":
+    import transcricao_audio
+    transcricao_audio.exibir()

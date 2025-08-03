@@ -207,6 +207,16 @@ ALTER TABLE item_compra_resultado MODIFY link TEXT;
 INSERT INTO item_compra (item) VALUES ('fone bluetooth'), ('placa mãe intel');
 INSERT INTO item_compra (item) VALUES ('impressora termica'), ('tonner HP');
 
+-- Tabela: transcricao
+CREATE TABLE transcricao (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_documento INT NOT NULL,
+    texto LONGTEXT NOT NULL,
+    datahora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_documento) REFERENCES perguntas(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 
 -- Tabela: area
