@@ -20,6 +20,7 @@ O diagrama a seguir ilustra a arquitetura de componentes:
 ---
 
 ## ⚙️ Funcionalidades Principais
+- A seguir, estão listadas as principais funcionalidades do serviço **app**:
 
 - **Assistente de voz** (`assistente2.py`): ativa por palavra‑chave (“computador”), registra perguntas e reproduz respostas em áudio.
 - **Captura de imagem** (`captura.py`): grava frames de webcam ou Kinect e salva no banco.
