@@ -20,4 +20,5 @@ run:
 ssh:
 >@ssh root@localhost -p 22
 conecta_app:
->@$(COMPOSE) exec app bash
+>$(COMPOSE) up -d app
+>$(COMPOSE) exec app bash
