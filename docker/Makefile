@@ -17,6 +17,6 @@ logs:
 >$(COMPOSE) logs -f
 
 run:
->$(COMPOSE) run --rm app python $(script)
+>$(COMPOSE) run --rm app python3 $(script)
 ssh:
 >@ssh root@localhost -p 22
