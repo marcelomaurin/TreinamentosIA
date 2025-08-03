@@ -1,147 +1,147 @@
-# 🧠 Ferramentas de Treinamento para Redes Neurais
+# TreinamentosIA: Ferramentas Integradas para Captura e Processamento de Dados
 
-Este projeto fornece um **conjunto integrado de ferramentas** para **captura, processamento e organização de dados** destinados ao **treinamento de modelos de IA**. Os dados são obtidos de diferentes fontes como áudio, vídeo, imagens, textos, produtos e e-mails.
-
----
-
-## 🎯 Objetivo
-
-- Criar uma base sólida de dados para treinar modelos de IA (voz, texto, imagem).
-- Utilizar fontes reais para enriquecer o dataset (YouTube, Mercado Livre, e-mail, webcam, documentos).
-- Automatizar o fluxo completo: **captura → processamento → organização → armazenamento**.
-- Controlar todos os dados via interface web (Streamlit).
-
-![Diagrama do Projeto](https://github.com/marcelomaurin/TreinamentosIA/blob/main/Diagrama_Ferramentas_Treinamento_Comercial.png?raw=true)
-
+Este projeto disponibiliza um **framework completo** para **coleta**, **processamento** e **organização** de dados multimodais (voz, imagem, texto e produtos) com o objetivo de gerar bases de treinamento para modelos de IA.
 
 ---
 
-## 📦 Funcionalidades
+## 📖 Visão Geral do Projeto
 
-| Módulo                    | Finalidade |
-|--------------------------|------------|
-| `assistente2.py`         | Assistente de voz com ativação por fala ("computador"). Registra a pergunta e responde com áudio. |
-| `captura.py`             | Captura imagens via câmera/Kinect e envia para o pipeline de pós-processamento. |
-| `processaimg.py`         | Executa os scripts cadastrados para tratar imagens recém-capturadas. |
-| `captura_face.py`        | Detecta rostos nas imagens, gera recortes e salva metadados no banco. |
-| `youtube.py`             | Busca vídeos no YouTube, transcreve legendas/áudios e insere frases no banco (`perguntas`). |
-| `captura_email.py`       | Gerencia múltiplas contas POP3, baixa e salva e-mails no banco. |
-| `busca_mercadolivre.py`  | Busca produtos com base nos itens de compra cadastrados, extrai dados e insere no banco. |
-| `analisadocumentos.py`   | Varre diretórios e dispara scripts de parsing para diferentes formatos de arquivo. |
-| `processa_pdf.py`        | Extrai texto de arquivos PDF e salva em `documentos`. |
-| `processa_txt.py`        | Converte arquivos TXT para o banco de dados `documentos`. |
-| `processachatbot.py`     | Gera respostas via OpenAI para perguntas pendentes e grava em `respostas`. |
-| `web/app.py`             | Interface de controle das ferramentas e dos dados usando Streamlit. |
+O fluxo principal do sistema consiste em:
+
+1. **Captura de dados**: coleta automática de áudio, vídeo, imagens de câmeras, e-mails e informações de e‑commerce.
+2. **Pós‑processamento**: transcrição de áudio, extração de texto de documentos, detecção de rostos e geração de metadados.
+3. **Armazenamento estruturado**: persistência de todos os registros em um banco MySQL.
+4. **Interface web**: painel de controle via Streamlit para gerenciar fontes, visualizar resultados e exportar dados.
+
+O diagrama a seguir ilustra a arquitetura de componentes:
+
+![Arquitetura do Projeto](Diagrama_Ferramentas_Treinamento_Comercial.png)
 
 ---
 
-## 🗄️ Banco de Dados
+## ⚙️ Funcionalidades Principais
 
-| Tabela                     | Finalidade |
-|----------------------------|------------|
-| `perguntas`               | Armazena todas as frases (voz, vídeos, documentos). |
-| `respostas`               | Respostas associadas às perguntas (via IA ou script). |
-| `subpergunta`             | Quebra automática de perguntas longas. |
-| `item_compra`             | Lista de produtos buscados no Mercado Livre. |
-| `item_compra_resultado`   | Resultado da busca dos produtos. |
-| `termobusca`              | Termos para varredura de vídeos no YouTube. |
-| `documentos`              | Texto extraído de arquivos (PDF, TXT, etc.). |
-| `foto`                    | Imagens capturadas (frames de câmeras). |
-| `face`                    | Recortes de rostos detectados nas imagens. |
-| `face_informacao`         | Informações da face (emoção, idade, etc.). |
-| `contas_email`            | Contas de e-mail POP3 configuradas. |
-| `emails`                  | E-mails capturados e armazenados. |
+- **Assistente de voz** (`assistente2.py`): ativa por palavra‑chave (“computador”), registra perguntas e reproduz respostas em áudio.
+- **Captura de imagem** (`captura.py`): grava frames de webcam ou Kinect e salva no banco.
+- **Detecção de faces** (`captura_face.py`): recorta rostos nas imagens e armazena atributos como emoção e idade.
+- **Processamento de imagens** (`processaimg.py`): executa scripts customizados cadastrados no banco para enriquecer metadados.
+- **Coleta de vídeos YouTube** (`youtube.py`): busca vídeos por termo, transcreve áudio/legendas e insere frases no banco.
+- **Coleta de e‑mails** (`captura_email.py`): lê contas POP3, baixa mensagens e grava no banco.
+- **Busca em e‑commerce** (`busca_mercadolivre.py`): pesquisa produtos no Mercado Livre e registra resultados.
+- **Processamento de documentos** (`analisadocumentos.py`, `processa_pdf.py`, `processa_txt.py`): extrai texto de PDFs/TXT para a tabela de documentos.
+- **Geração de respostas IA** (`processachatbot.py`): utiliza a API OpenAI para responder perguntas pendentes.
+- **Interface Web** (`web/app.py`): painel Streamlit para monitorar e controlar todas as etapas.
 
 ---
 
-## 📂 Requisitos
+## 🗄️ Banco de Dados e Tabelas
 
-- Python 3.10+
-- MySQL Server
-- FFmpeg
-- yt-dlp
-- Streamlit
+Todas as informações são armazenadas no banco MySQL `IAdb`. As principais tabelas e seus propósitos:
 
-### `requirements.txt` (exemplo)
+| Tabela                   | Descrição                                                             |
+|--------------------------|-----------------------------------------------------------------------|
+| `perguntas`             | Frases capturadas (voz, vídeos, documentos)                           |
+| `respostas`             | Respostas geradas (IA ou scripts customizados)                        |
+| `subpergunta`           | Fragmentos de perguntas longas divididos automaticamente              |
+| `documentos`            | Texto extraído de arquivos (PDF, DOCX, TXT)                           |
+| `foto`                  | Imagens brutas capturadas pela câmera                                 |
+| `face`                  | Recortes de faces detectadas                                          |
+| `face_informacao`       | Metadados extraídos das faces (emoção, idade, gênero, etc.)           |
+| `contas_email`          | Configurações de contas POP3                                          |
+| `emails`                | Mensagens de e‑mail baixadas                                          |
+| `termobusca`            | Termos para busca de vídeos no YouTube                                |
+| `item_compra`           | Itens de interesse para busca no Mercado Livre                        |
+| `item_compra_resultado` | Resultados retornados pela busca de produtos                          |
 
-```text
-mysql-connector-python
-gTTS
-SpeechRecognition
-opencv-python
-pydub
-noisereduce
-yt-dlp
-streamlit
-requests
-beautifulsoup4
-python-docx
-PyPDF2
+### Script de criação do banco
+
+```sql
+-- Cria banco e tabelas principais
+CREATE DATABASE IF NOT EXISTS IAdb;
+USE IAdb;
+
+-- Exemplo simplificado de tabela perguntas
+CREATE TABLE perguntas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  texto TEXT NOT NULL,
+  origem VARCHAR(50),
+  data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+-- Demais tabelas seguem estrutura similar, veja `mysql/IAdb.sql`
 ```
 
 ---
 
-## ▶️ Como Executar
+## 🚀 Instalação e Execução
+
+### Pré-requisitos
+
+- Docker Engine & Docker Compose (v2+)
+- Git
+- (Opcional) Python 3.10+ para execução local sem Docker
+
+### Configuração do ambiente
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/TreinamentosIA.git
+   cd TreinamentosIA
+   ```
+2. Copie o arquivo de exemplo `.env.example` para `docker/.env` e edite com suas credenciais:
+   ```bash
+   cp .env.example docker/.env
+   vim docker/.env
+   ```
+
+### Execução via Docker
+
+No diretório `docker/`, execute:
 
 ```bash
-# Assistente de voz
-python assistente2.py
+# Compila a imagem (inclui dependências e headers para PyAudio)
+make build
 
-# Captura de imagem via webcam
-python captura.py
+# Sobe os containers (app + banco MySQL)
+make up
 
-# Coleta de vídeos e frases do YouTube
-python youtube.py
+# Visualiza logs em tempo real
+make logs
 
-# Captura e armazenamento de e-mails
-python captura_email.py
+# Para e remove containers
+make down
+```
 
-# Busca de produtos no Mercado Livre
-python busca_mercadolivre.py
+Após o container subir, a interface Streamlit estará disponível em `http://localhost:8501`.
 
-# Processamento de documentos em pasta
-python analisadocumentos.py
+### Execução local (sem Docker)
 
-# Interface Web
-cd web
-streamlit run app.py
+1. Instale dependências:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Configure e crie o banco MySQL localmente, rodando `mysql/IAdb.sql`.
+3. Execute módulos diretamente, ex:
+   ```bash
+   python assistente2.py
+   python captura.py
+   ```
+
+---
+
+## 📂 Estrutura de Diretórios
+
+```
+. 
+├── docker/                # Dockerfile, compose e scripts de orquestração
+├── mysql/                 # Script SQL de criação do banco
+├── web/                   # Código da interface Streamlit
+├── app/                   # Módulos de captura e processamento
+├── .env.example           # Exemplo de variáveis de ambiente
+└── README.md              # Documentação do projeto
 ```
 
 ---
 
-## 🧑‍💻 Guia para Programadores de IA
+## 📝 Licença
 
-1. **Prepare o ambiente** – gere as tabelas executando `IAdb.sql` em um servidor MySQL e instale as dependências de `requirements.txt`.
-2. **Colete dados** – use os módulos de captura (`assistente2.py`, `captura.py`, `youtube.py`, `captura_email.py`, `busca_mercadolivre.py`, `analisadocumentos.py`) para popular o banco com voz, imagens, textos e metadados.
-3. **Pós-processamento** – cadastre scripts na tabela `processa_img` para que `processaimg.py` execute rotinas como `captura_face.py` após cada captura. Adicione novos scripts para extrair características ou rótulos para seus modelos.
-4. **Geração de respostas** – configure sua chave da OpenAI e utilize `processachatbot.py` para completar automaticamente as entradas da tabela `perguntas` com respostas geradas.
-5. **Exploração e exportação** – utilize a interface `web/app.py` para revisar as instâncias, validar amostras e exportar os dados para seu pipeline de treinamento.
-
-Este fluxo fornece uma base completa para criação de datasets multimodais, permitindo personalização em cada etapa conforme a necessidade do modelo que você deseja treinar.
-
----
-
-## 🌐 Interface Web (Streamlit)
-
-A interface permite:
-
-- Visualizar imagens e faces detectadas
-- Consultar perguntas e respostas
-- Gerenciar contas de e-mail e seus e-mails
-- Ver resultados do Mercado Livre
-- Analisar documentos cadastrados
-- Controlar termos para busca no YouTube
-
----
-
-## 📌 Observações
-
-- O sistema usa o banco `IAdb` para todas as interações.
-- Você pode adicionar novos módulos, como processamento de áudio, OCR, classificação, etc.
-- Cada item pode ser expandido para criar datasets supervisionados, não supervisionados ou pré-processados para IA.
-
----
-
-## 📄 Licença
-
-Projeto livre para fins pessoais, educacionais e acadêmicos.
+Uso livre para fins educacionais e pesquisa. Sinta-se à vontade para adaptar e contribuir!
