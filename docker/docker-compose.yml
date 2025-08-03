@@ -3,6 +3,9 @@ version: '3.8'
 networks:
   ia_network:
     driver: bridge
+
+volumes:
+  mysql_data:
 services:
   app:
     build: .
@@ -24,6 +27,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
     volumes:
+      - mysql_data:/var/lib/mysql
       - ./mysql/IAdb.sql:/docker-entrypoint-initdb.d/IAdb.sql
     ports:
       - "3307:3306"
