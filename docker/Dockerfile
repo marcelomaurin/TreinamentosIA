@@ -24,4 +24,6 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY app/ .
 ENV APP_SCRIPT=assistente2.py
 
-CMD ["sh", "-c", "/usr/sbin/sshd && python3 ${APP_SCRIPT}"]
+# Ajusta permissão e inicia SSH e Streamlit via web/run.sh
+RUN chmod +x web/run.sh
+CMD ["sh", "-c", "/usr/sbin/sshd && ./web/run.sh"]
