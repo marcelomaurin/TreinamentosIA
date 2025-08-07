@@ -72,6 +72,17 @@ CREATE TABLE respostas (
   FOREIGN KEY (id_pergunta) REFERENCES perguntas(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE subresposta (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_pergunta INT NOT NULL,
+  id_subpergunta INT NOT NULL,
+  data DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  texto TEXT NOT NULL,
+  FOREIGN KEY (id_pergunta) REFERENCES perguntas(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_subpergunta) REFERENCES subpergunta(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 -- Tabela: analise_sentimentos
 CREATE TABLE analise_sentimentos (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -207,16 +218,6 @@ ALTER TABLE item_compra_resultado MODIFY link TEXT;
 INSERT INTO item_compra (item) VALUES ('fone bluetooth'), ('placa mãe intel');
 INSERT INTO item_compra (item) VALUES ('impressora termica'), ('tonner HP');
 
--- Tabela: transcricao
-CREATE TABLE transcricao (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_documento INT NOT NULL,
-    texto LONGTEXT NOT NULL,
-    datahora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_documento) REFERENCES perguntas(id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 
 
 -- Tabela: area
@@ -306,7 +307,57 @@ CREATE TABLE emails (
     FOREIGN KEY (id_conta) REFERENCES contas_email(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+ALTER TABLE emails MODIFY mensagem_id VARCHAR(255) NULL;
+
+-- Tabela de relacionamento entre emails e palavras-chave
+CREATE TABLE emails_palavraschaves (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id_email INT NOT NULL,         -- FK para a tabela emails
+    id_palavra INT NOT NULL,       -- FK para a tabela palavraschaves
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_emails_palavras_email FOREIGN KEY (id_email) REFERENCES emails(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_emails_palavras_palavra FOREIGN KEY (id_palavra) REFERENCES palavraschaves(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE KEY uq_email_palavra (id_email, id_palavra)  -- Garante que não haja duplicidade no vínculo
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 ALTER TABLE emails 
 ADD COLUMN message_id VARCHAR(255) NOT NULL UNIQUE AFTER tipo;
 
 ALTER TABLE emails MODIFY tipo VARCHAR(50);
+
+ALTER TABLE emails  DROP COLUMN message_id;
+
+-- Tabela: documentos_email
+CREATE TABLE documentos_email (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id_documento INT NOT NULL,       -- FK para a tabela documentos
+    id_email INT NOT NULL,           -- FK para a tabela emails
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_documentos_email_documento 
+        FOREIGN KEY (id_documento) REFERENCES documentos(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_documentos_email_email 
+        FOREIGN KEY (id_email) REFERENCES emails(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE KEY uq_documento_email (id_documento, id_email) -- Impede duplicidade do vínculo
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE documentos (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    texto LONGTEXT NOT NULL,
+    caminho VARCHAR(500) NOT NULL,
+    id_origem INT NOT NULL,
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_documentos_origem FOREIGN KEY (id_origem) REFERENCES origem(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE documentos 
+ADD COLUMN resumo LONGTEXT NULL AFTER texto;
+
+
+CREATE TABLE palavraschaves (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    palavra VARCHAR(255) NOT NULL UNIQUE,
+    dtcad TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
