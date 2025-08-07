@@ -8,7 +8,4 @@ numpy
 pyttsx3
 pyaudio
 opencv-python
-python-dotenv
 
-google-cloud-speech
-webrtcvad
