@@ -1,5 +1,4 @@
 yt-dlp
-pydub
 noisereduce
 SpeechRecognition
 mysql-connector-python
@@ -8,4 +7,10 @@ numpy
 pyttsx3
 pyaudio
 opencv-python
+streamlit==1.38.*
+gTTS==2.5.1
+pydub==0.25.1
+
+
+
 
