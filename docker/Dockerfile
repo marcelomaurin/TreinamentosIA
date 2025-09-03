@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     openssh-server \
     mysql-client \
+    python3-tk tcl tk \
     && rm -rf /var/lib/apt/lists/*
 
 # SSH: prepara diretório e habilita login por senha (root:root)

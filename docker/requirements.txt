@@ -10,6 +10,7 @@ opencv-python
 streamlit==1.38.*
 gTTS==2.5.1
 pydub==0.25.1
+python-dotenv==1.0.1
 
 
 

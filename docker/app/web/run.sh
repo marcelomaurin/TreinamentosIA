@@ -23,33 +23,34 @@ if [[ ! -f "/app/${APP_SCRIPT}" ]]; then
   exit 1
 fi
 
-# --- SSHD opcional (se quiser manter acesso SSH no container) ---
+# --- SSHD opcional ---
 if command -v /usr/sbin/sshd >/dev/null 2>&1; then
   echo "[run.sh] Iniciando sshd em background"
   /usr/sbin/sshd -D &
 fi
 
-# --- Escolhe servidor disponível ---
-if command -v streamlit >/dev/null 2>&1; then
-  echo "[run.sh] Iniciando Streamlit"
-  exec streamlit run "/app/${APP_SCRIPT}" \
+# --- Streamlit via módulo Python (mais robusto) ---
+if python3 -c "import streamlit" >/dev/null 2>&1; then
+  echo "[run.sh] Iniciando Streamlit (python -m streamlit)"
+  exec python3 -m streamlit run "/app/${APP_SCRIPT}" \
     --server.address "${HOST}" \
     --server.port "${PORT}" \
     --server.enableCORS false \
     --browser.gatherUsageStats false
 fi
 
-if command -v uvicorn >/dev/null 2>&1; then
+# --- Fallbacks (caso queira suportar outros servidores) ---
+if python3 -c "import uvicorn" >/dev/null 2>&1; then
   echo "[run.sh] Iniciando Uvicorn (ajuste 'main:app' se necessário)"
-  exec uvicorn main:app --host "${HOST}" --port "${PORT}"
+  exec python3 -m uvicorn main:app --host "${HOST}" --port "${PORT}"
 fi
 
-if command -v flask >/dev/null 2>&1; then
+if python3 -c "import flask" >/dev/null 2>&1; then
   echo "[run.sh] Iniciando Flask"
   export FLASK_APP="/app/${APP_SCRIPT}"
-  exec flask run --host "${HOST}" --port "${PORT}"
+  exec python3 -m flask run --host "${HOST}" --port "${PORT}"
 fi
 
-echo "[ERRO] Não encontrei servidor (streamlit/uvicorn/flask). Instale um deles no requirements.txt."
+echo "[ERRO] Não encontrei servidor (streamlit/uvicorn/flask). Instale pelo requirements.txt."
 exit 1
 
