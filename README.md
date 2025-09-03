@@ -26,7 +26,7 @@ O diagrama a seguir ilustra a arquitetura de componentes:
 - **Captura de imagem** (`captura.py`): grava frames de webcam ou Kinect e salva no banco.
 - **Detecção de faces** (`captura_face.py`): recorta rostos nas imagens e armazena atributos como emoção e idade.
 - **Processamento de imagens** (`processaimg.py`): executa scripts customizados cadastrados no banco para enriquecer metadados.
-- **Coleta de vídeos YouTube** (`youtube.py`): busca vídeos por termo, transcreve áudio/legendas e insere frases no banco.
+- **Coleta de vídeos YouTube** (`youtube.py`/`youtube2.py`): busca vídeos por termo, transcreve áudio/legendas e insere frases no banco.
 - **Coleta de e‑mails** (`captura_email.py`): lê contas POP3, baixa mensagens e grava no banco.
 - **Busca em e‑commerce** (`busca_mercadolivre.py`): pesquisa produtos no Mercado Livre e registra resultados.
 - **Processamento de documentos** (`analisadocumentos.py`, `processa_pdf.py`, `processa_txt.py`): extrai texto de PDFs/TXT para a tabela de documentos.
@@ -34,6 +34,8 @@ O diagrama a seguir ilustra a arquitetura de componentes:
 - **Transcrição de Áudio** (`processa_transcricao_audio.py`): fragmenta áudio em blocos de até 1 minuto (respeitando silêncios), filtra apenas voz, envia ao Google Speech-to-Text e armazena no banco.
 - **Interface Web** (`docker/app/web/main.py`): painel Streamlit para monitorar e controlar todas as etapas.
 
+* A diferença entre o youtube.py e youtube2.py é a entrada. No youtube2.py o url do vídeo é passado como parametro.
+* No youtube.py ele pega do banco de dados.
 ---
 
 ## 🗄️ Banco de Dados e Tabelas
