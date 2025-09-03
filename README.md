@@ -112,6 +112,10 @@ make logs
 
 # Para e remove containers
 make down
+
+# Para acessar via ssh
+make ssh
+# usuario padrao root, senha root
 ```
 
 Após o container subir, a interface Streamlit estará disponível em `http://localhost:8501`.
@@ -151,6 +155,10 @@ export GOOGLE_APPLICATION_CREDENTIALS="/caminho/para/sua-chave.json"
 ├── .env.example           # Exemplo de variáveis de ambiente para o Docker
 └── README.md              # Documentação do projeto
 ```
+
+## Diretorio do script no container
+/app/ # todos os scripts ficam aqui
+
 
 ---
 
